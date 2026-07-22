@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>南开新生问答 · 单文件离线版</title>
+  <meta name="description" content="根据 2026 南开大学新生群交流整理的常见问题解答，可搜索、可筛选、手机友好。群聊回答不代表学校官方结论，请以学校最新官方通知为准。">
+  <meta name="color-scheme" content="light dark">
+  <style>
+/* 南开新生问答 — 青莲紫主题
+   设计基调：南开的学术气质（1919，允公允能日新月异，莲/青莲紫）。
+   标志色为青莲紫，标题用衬线体，正文用系统无衬线，手机优先。 */
+
+:root {
+  --nk-purple: #6d2b91;      /* 青莲紫 */
+  --nk-purple-deep: #4e1c6b;
+  --nk-purple-soft: #f3ecf8;
+  --nk-purple-line: #e2d3ee;
+  --ink: #2a2233;            /* 带紫调的近黑 */
+  --ink-2: #5b5266;
+  --ink-3: #857b90;
+  --paper: #faf8fc;
+  --card: #ffffff;
+  --line: #ece7f1;
+  --amber: #b5651d;          /* 冲突/警示 */
+  --amber-soft: #fdf3e6;
+  --green: #2f7d4f;
+  --green-soft: #e8f5ec;
+  --blue: #2563a8;
+  --blue-soft: #e8f0fa;
+  --gray: #6a6475;
+  --gray-soft: #efedf2;
+  --focus: #8a4fbf;
+  --radius: 14px;
+  --shadow: 0 1px 2px rgba(42,34,51,.05), 0 6px 20px rgba(78,28,107,.06);
+  --maxw: 760px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --nk-purple: #c79be6;
+    --nk-purple-deep: #b487da;
+    --nk-purple-soft: #2a2036;
+    --nk-purple-line: #3d3050;
+    --ink: #ece9f2;
+    --ink-2: #b8b0c6;
+    --ink-3: #8f869e;
+    --paper: #17131d;
+    --card: #201a29;
+    --line: #322a3f;
+    --amber: #e0a35c;
+    --amber-soft: #33261a;
+    --green: #7fc99a;
+    --green-soft: #1e2f24;
+    --blue: #8fb6e6;
+    --blue-soft: #1c2836;
+    --gray: #a49bb2;
+    --gray-soft: #2b2436;
+    --focus: #c79be6;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 22px rgba(0,0,0,.35);
+  }
+}
+/* 手动切换覆盖 */
+html[data-theme="dark"] { color-scheme: dark; }
+html[data-theme="light"] { color-scheme: light; }
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei",
+               "Segoe UI", "Noto Sans SC", Roboto, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.6;
+  font-size: 16px;
+}
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 18px; }
+
+/* ---------- 页眉 ---------- */
+.masthead { padding: 34px 0 18px; border-bottom: 1px solid var(--nk-purple-line); }
+.eyebrow {
+  font-size: 12.5px; letter-spacing: .28em; color: var(--nk-purple);
+  font-weight: 600; margin: 0 0 8px;
+}
+.eyebrow .est { color: var(--ink-3); letter-spacing: .1em; margin-left: 8px; }
+.title {
+  font-family: "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
+  font-size: clamp(28px, 7vw, 40px); font-weight: 700; letter-spacing: .02em;
+  color: var(--ink); margin: 0 0 6px; line-height: 1.15;
+}
+.title .accent { color: var(--nk-purple); }
+.subtitle { color: var(--ink-2); font-size: 14.5px; margin: 0 0 14px; max-width: 60ch; }
+.lotus-rule { height: 3px; width: 54px; background: linear-gradient(90deg, var(--nk-purple), transparent); border-radius: 3px; }
+
+.theme-toggle {
+  position: absolute; top: 16px; right: 16px;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink-2);
+  border-radius: 999px; padding: 7px 12px; font-size: 13px; cursor: pointer;
+  box-shadow: var(--shadow);
+}
+.theme-toggle:hover { color: var(--nk-purple); border-color: var(--nk-purple-line); }
+.masthead-inner { position: relative; }
+
+/* ---------- 免责声明 ---------- */
+.disclaimer {
+  margin: 16px 0 0; padding: 12px 14px; border-radius: var(--radius);
+  background: var(--nk-purple-soft); border: 1px solid var(--nk-purple-line);
+  color: var(--ink-2); font-size: 13px;
+}
+.disclaimer strong { color: var(--nk-purple); }
+
+/* ---------- 搜索 ---------- */
+.searchbar { position: sticky; top: 0; z-index: 20; background: var(--paper);
+  padding: 14px 0 10px; margin-top: 6px; }
+.search-field { position: relative; }
+.search-field input {
+  width: 100%; padding: 14px 44px 14px 44px; font-size: 16px;
+  border: 1.5px solid var(--line); border-radius: var(--radius);
+  background: var(--card); color: var(--ink); box-shadow: var(--shadow);
+}
+.search-field input:focus { outline: none; border-color: var(--focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 22%, transparent); }
+.search-ico { position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--ink-3); pointer-events: none; }
+.clear-btn {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  border: none; background: var(--gray-soft); color: var(--ink-2);
+  width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 16px;
+  display: none; align-items: center; justify-content: center;
+}
+.clear-btn.show { display: inline-flex; }
+.clear-btn:hover { background: var(--nk-purple-soft); color: var(--nk-purple); }
+
+/* ---------- 分类筛选 ---------- */
+.chips { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 10px;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  flex: 0 0 auto; border: 1px solid var(--line); background: var(--card);
+  color: var(--ink-2); border-radius: 999px; padding: 7px 14px; font-size: 13.5px;
+  cursor: pointer; white-space: nowrap;
+}
+.chip:hover { border-color: var(--nk-purple-line); color: var(--nk-purple); }
+.chip[aria-pressed="true"] { background: var(--nk-purple); border-color: var(--nk-purple);
+  color: #fff; font-weight: 600; }
+html[data-theme="dark"] .chip[aria-pressed="true"],
+@media (prefers-color-scheme: dark) { }
+.chip .c { opacity: .7; font-variant-numeric: tabular-nums; margin-left: 5px; }
+
+/* ---------- 计数 ---------- */
+.count { color: var(--ink-3); font-size: 13px; padding: 2px 2px 14px; }
+.count b { color: var(--nk-purple); }
+
+/* ---------- FAQ 卡片 ---------- */
+.list { display: flex; flex-direction: column; gap: 12px; padding-bottom: 40px; }
+.faq {
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--card);
+  box-shadow: var(--shadow); overflow: hidden; scroll-margin-top: 130px;
+}
+.faq.target { border-color: var(--nk-purple); box-shadow: 0 0 0 2px var(--nk-purple-soft), var(--shadow); }
+.faq-head {
+  width: 100%; text-align: left; border: none; background: none; cursor: pointer;
+  padding: 16px 44px 16px 18px; position: relative; color: var(--ink);
+  font-size: 16px; font-weight: 600; line-height: 1.45; display: block;
+}
+.faq-head:focus-visible { outline: 2.5px solid var(--focus); outline-offset: -3px; border-radius: var(--radius); }
+.faq-head .cat-tag {
+  display: inline-block; font-size: 11.5px; font-weight: 600; color: var(--nk-purple);
+  background: var(--nk-purple-soft); border-radius: 6px; padding: 2px 7px; margin-bottom: 7px;
+}
+.faq-head .q { display: block; }
+.faq-head .chev { position: absolute; right: 16px; top: 18px; color: var(--ink-3);
+  transition: transform .18s ease; }
+.faq[open-state="1"] .faq-head .chev { transform: rotate(180deg); }
+.faq-head .mini-badges { margin-top: 7px; display: flex; gap: 6px; flex-wrap: wrap; }
+
+.faq-body { display: none; padding: 2px 18px 18px; border-top: 1px solid var(--line); }
+.faq[open-state="1"] .faq-body { display: block; }
+
+/* 警示条 */
+.alert { margin: 14px 0 0; padding: 10px 12px; border-radius: 10px; font-size: 13.5px; }
+.alert.conflict { background: var(--amber-soft); border: 1px solid color-mix(in srgb, var(--amber) 35%, transparent); color: var(--amber); }
+.alert.outdated { background: var(--gray-soft); border: 1px solid color-mix(in srgb, var(--gray) 30%, transparent); color: var(--ink-2); }
+.alert .a-t { font-weight: 700; }
+
+/* 回答 */
+.answers { margin-top: 6px; display: flex; flex-direction: column; gap: 12px; }
+.ans { padding: 12px 0 0; }
+.ans + .ans { border-top: 1px dashed var(--line); }
+.ans .text { color: var(--ink); font-size: 15px; }
+.ans .applies { margin-top: 6px; font-size: 12.5px; color: var(--ink-2);
+  background: var(--nk-purple-soft); border-radius: 8px; padding: 6px 9px; }
+.ans .applies::before { content: "适用/说明 · "; color: var(--nk-purple); font-weight: 600; }
+.ans-meta { margin-top: 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  font-size: 12.5px; color: var(--ink-3); }
+.src { color: var(--ink-2); }
+.src::before { content: "— "; }
+.date { font-variant-numeric: tabular-nums; }
+
+/* 徽章 */
+.badge { font-size: 11.5px; font-weight: 600; border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+.b-official { background: var(--green-soft); color: var(--green); }
+.b-multi { background: var(--blue-soft); color: var(--blue); }
+.b-single { background: var(--gray-soft); color: var(--gray); }
+.b-conflict { background: var(--amber-soft); color: var(--amber); }
+.b-outdated { background: var(--gray-soft); color: var(--gray); }
+.b-na { background: var(--gray-soft); color: var(--gray); }
+.b-para { background: transparent; color: var(--ink-3); border: 1px solid var(--line); font-weight: 500; }
+
+/* 补充说明 & 官方核验 */
+.note { margin-top: 14px; font-size: 13px; color: var(--ink-2);
+  border-left: 3px solid var(--nk-purple-line); padding: 2px 0 2px 12px; }
+.official {
+  margin-top: 14px; padding: 12px 13px; border-radius: 10px;
+  background: var(--green-soft); border: 1px solid color-mix(in srgb, var(--green) 30%, transparent);
+}
+.official .o-t { font-size: 13px; font-weight: 700; color: var(--green); margin-bottom: 5px;
+  display: flex; align-items: center; gap: 6px; }
+.official .o-b { font-size: 13px; color: var(--ink); }
+.official .o-src { margin-top: 7px; font-size: 12px; color: var(--ink-2); }
+.official .o-src a { color: var(--green); word-break: break-all; }
+
+.copy-link { margin-top: 12px; font-size: 12.5px; color: var(--ink-3);
+  background: none; border: none; cursor: pointer; padding: 0; }
+.copy-link:hover { color: var(--nk-purple); }
+
+/* 空状态 */
+.empty { text-align: center; padding: 48px 16px; color: var(--ink-2); }
+.empty .big { font-family: "Songti SC","Noto Serif SC",serif; font-size: 24px; color: var(--nk-purple); margin-bottom: 8px; }
+.empty button { margin-top: 14px; border: 1px solid var(--nk-purple-line); background: var(--card);
+  color: var(--nk-purple); border-radius: 999px; padding: 8px 16px; cursor: pointer; font-size: 14px; }
+.empty button:hover { background: var(--nk-purple-soft); }
+
+/* 页脚 */
+.foot { border-top: 1px solid var(--line); padding: 22px 0 40px; color: var(--ink-3);
+  font-size: 12.5px; line-height: 1.7; }
+.foot .updated b { color: var(--ink-2); }
+.foot a { color: var(--nk-purple); text-decoration: none; }
+.foot a:hover { text-decoration: underline; }
+
+mark { background: color-mix(in srgb, var(--nk-purple) 22%, transparent); color: inherit; border-radius: 3px; padding: 0 1px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+@media (min-width: 620px) { .faq-head { font-size: 16.5px; } }
+
+</style>
+</head>
+<body>
+  <header class="masthead">
+    <div class="wrap masthead-inner">
+      <button id="theme-toggle" class="theme-toggle" type="button">☾ 深色</button>
+      <p class="eyebrow">允公允能 · 日新月异<span class="est">SINCE 1919</span></p>
+      <h1 class="title">南开新生问答<span class="accent">.</span></h1>
+      <p class="subtitle" id="subtitle">把新生群里被反复问到的问题整理成一页，方便查找。每条回答都标注了匿名来源、日期与可信度，冲突和可能过时的信息都会明确提示。</p>
+      <div class="lotus-rule"></div>
+      <div class="disclaimer" id="disclaimer"></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="searchbar">
+      <div class="search-field">
+        <span class="search-ico" aria-hidden="true">🔍</span>
+        <input id="search" type="search" inputmode="search" autocomplete="off"
+               placeholder="搜索问题、答案、关键词或分类，例如：军训、校区、宿舍…"
+               aria-label="搜索问答">
+        <button id="clear" class="clear-btn" type="button" aria-label="清除搜索">×</button>
+      </div>
+      <nav class="chips" id="chips" aria-label="分类筛选"></nav>
+    </div>
+
+    <p class="count" id="count" aria-live="polite"></p>
+    <section class="list" id="list" aria-live="polite"></section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap">
+      <p class="updated" id="updated"></p>
+      <p>本页面为新生自发整理，非南开大学官方发布。内容仅供参考，具体安排请以
+        <a href="https://zsb.nankai.edu.cn/" target="_blank" rel="noopener">南开大学本科招生网</a>
+        等官方渠道的最新通知为准。</p>
+    </div>
+  </footer>
+
+  <script>window.__FAQ_DATA__ = {"meta": {"school": "南开大学", "source": "2026南开大学新生群（QQ）聊天记录整理", "generated": "2026-07-22", "msg_total": 4538, "range": "2026-07-19 至 2026-07-22（北京时间）", "disclaimer": "本页面根据新生群交流整理，群聊回答不代表学校官方结论，具体安排请以学校最新官方通知为准。"}, "categories": [{"key": "enroll", "name": "报到与入学材料"}, {"key": "dorm", "name": "宿舍与生活设施"}, {"key": "major", "name": "专业·班级·校区"}, {"key": "course", "name": "选课与教务"}, {"key": "fee", "name": "学费与缴费"}, {"key": "military", "name": "军训"}, {"key": "campus", "name": "校区交通与地图"}, {"key": "life", "name": "食堂与校园生活"}, {"key": "card", "name": "网络·校园卡·账号"}, {"key": "club", "name": "社团与学生组织"}, {"key": "other", "name": "其他常见问题"}], "faqs": [{"id": "baodao-time", "q": "新生什么时候报到？报到前后几天是怎么安排的？", "cat": "enroll", "kw": ["报到时间", "报道时间", "8月29", "29号", "开学时间", "什么时候开学"], "conflict": false, "outdated": false, "note": "官方招生章程写明“新生须按录取通知书指定时间来校报到，具体事宜参考《南开大学新生入学须知》”。截至整理日未检索到公开的《入学须知》确认上述具体日期，请以通知书为准。", "official": {"title": "报到与入学资格审查", "src": "南开大学2026年本科招生章程（第二十一条）", "url": "https://zsb.nankai.edu.cn/2026-05-27/1813.html", "date": "2026-07-22", "text": "官方章程写明：新生报到时学校对入学资格进行初步审查；录取的学生须按录取通知书指定时间来校报到，具体事宜参考《南开大学新生入学须知》。截至核验日未检索到公开的《入学须知》确认群聊所说 8/29 报到、8/31 军训等具体日期。"}, "answers": [{"text": "群里学长学姐说：8月29号报到，8月30号是二次选拔考试（上午数学、英语统考，下午伯苓班加试），8月31号开始军训。8月28号可以提前进校园逛逛。", "date": "2026-07-21", "verify": "多人回答一致", "para": true, "applies": "仅为群聊转述，具体日期务必以学校《新生入学须知》和录取通知书为准", "src": "在校学长学姐A"}]}, {"id": "tongzhishu", "q": "录取通知书大概什么时候寄出？怎么查快递？", "cat": "enroll", "kw": ["通知书", "录取通知书", "什么时候寄", "快递", "EMS", "邮寄"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "一般正式录取后两三天就会开始寄，具体取决于学校什么时候邮寄。", "date": "2026-07-20", "verify": "单一经验回答", "para": true, "src": "在校学长学姐B"}, {"text": "可以用高考报名时填的手机号，在 EMS 上查名下快递；通知书一般走邮政。", "date": "2026-07-21", "verify": "单一经验回答", "para": true, "src": "在校学长学姐A"}]}, {"id": "xuehao", "q": "学号在哪里看？", "cat": "enroll", "kw": ["学号", "怎么看学号"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "录取通知书上会有学号。", "date": "2026-07-19", "verify": "多人回答一致", "para": true, "src": "在校学长学姐C"}]}, {"id": "jihuo", "q": "在官网激活账号显示“身份不符”怎么办？", "cat": "enroll", "kw": ["激活账号", "身份不符", "注册账号", "官网激活"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "等学校统一安排即可。往年是八月多才给新生注册，现在激活不了很正常。", "date": "2026-07-21", "verify": "单一经验回答", "para": true, "src": "在校学长学姐B"}]}, {"id": "jiazhangqun", "q": "有没有官方新生家长群？", "cat": "enroll", "kw": ["家长群", "新生家长群", "官方群"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "没有。大学没有官方家长群，以后官方也不会建。辅导员平时用飞书联系。", "date": "2026-07-19", "verify": "多人回答一致", "para": true, "src": "在校学长学姐B"}]}, {"id": "yinhangka", "q": "新生需要自己去办银行卡吗？办哪个银行？", "cat": "enroll", "kw": ["银行卡", "交通银行", "办卡", "储蓄卡"], "conflict": false, "outdated": false, "note": "群里有同学提醒：去银行时不要被推销办“社保卡”并激活社保缴费功能，网传可能影响应届生身份（此为群友说法，非官方结论，办理前请咨询官方）。", "official": null, "answers": [{"text": "不用自己特意去办。学校过一段时间会发一张交通银行储蓄卡，到校后去银行激活一下即可。", "date": "2026-07-20", "verify": "单一经验回答", "para": true, "src": "在校学长学姐B"}]}, {"id": "dianhuaka", "q": "到天津还要再办当地电话卡/流量卡吗？", "cat": "enroll", "kw": ["电话卡", "流量卡", "手机卡", "套餐"], "conflict": false, "outdated": false, "note": "群里有人发“全国通用流量+免费+视频会员”之类的办卡推广，属广告，请自行甄别，勿轻信。", "official": null, "answers": [{"text": "用不着专门办当地卡。想办的话，到校后可以去学校旁边（八里台）或校内（津南）的电信营业厅问套餐。", "date": "2026-07-21", "verify": "单一经验回答", "para": true, "src": "群友"}]}, {"id": "xingli", "q": "行李箱买多大？行李多怎么办？", "cat": "enroll", "kw": ["行李箱", "行李", "多大", "邮寄行李"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "看你行李量决定尺寸。行李多的话可以提前把一部分邮寄到学校。", "date": "2026-07-20", "verify": "单一经验回答", "para": true, "src": "在校学长学姐B"}]}, {"id": "xiaoqu-how", "q": "怎么知道自己大一在哪个校区（八里台/津南）？", "cat": "major", "kw": ["哪个校区", "校区怎么看", "分校区", "八里台", "津南", "随机分校区", "代管学院"], "conflict": false, "outdated": false, "note": "部分大类是“随机/按分流学院”确定校区，开学后才定。", "official": null, "answers": [{"text": "大一在哪个校区主要看你被哪个学院代管、以及录取的专业组——专业组里的专业全在津南，一般就在津南。具体校区通常临近开学、分了代管学院后才确定。", "date": "2026-07-22", "verify": "多人回答一致", "para": true, "src": "在校学长学姐B"}]}, {"id": "xiaoqu-when", "q": "什么时候能确定分到哪个校区？", "cat": "major", "kw": ["什么时候知道校区", "校区什么时候定", "八月底"], "conflict": false, "outdated": false, "note": "两种说法都指向“开学前不久”，方向一致。", "official": null, "answers": [{"text": "八月底左右确定。", "date": "2026-07-19", "verify": "单一经验回答", "para": true, "src": "在校学长学姐B"}, {"text": "临近开学才知道。", "date": "2026-07-19", "verify": "单一经验回答", "para": true, "src": "在校学长学姐B"}]}, {"id": "xiaoqu-map", "q": "八里台和津南各是什么情况？津南远不远？", "cat": "campus", "kw": ["八里台", "津南", "老校区", "偏", "远", "咸水沽", "7号线", "周边"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "八里台是老校区；津南校区比较偏、离市区远（到咸水沽了），周边比较荒。报到当天天南大新生都挤地铁 7 号线，可能很堵。", "date": "2026-07-22", "verify": "多人回答一致", "para": true, "src": "群友"}]}, {"id": "xiaoqu-major", "q": "各专业/大类大概在哪个校区？", "cat": "major", "kw": ["专业校区", "材料", "光电", "法学", "公共管理", "数学", "物理", "化学", "材料化学", "信息科学与技术"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "群里学长学姐的经验说法（非官方、以学院最终安排为准）：材料、光电信息、法学、公共管理、工科试验班（信息科学与技术）等在津南；数学与大数据、物理学/应用物理、化学生物等偏八里台。“物质科学”里材料在津南、化生在八里台，具体等开学分了代管学院才定。", "date": "2026-07-22", "verify": "多人回答一致", "para": true, "applies": "大类分流后按代管学院定，务必以学院/学校通知为准", "src": "在校学长学姐B"}]}, {"id": "zhuanzhuanye", "q": "入学后能转专业吗？难不难？", "cat": "major", "kw": ["转专业", "转专业难吗", "大一下", "转专业时间"], "conflict": false, "outdated": false, "note": "数字为群友经验（约60%、30进15），非官方口径。", "official": null, "answers": [{"text": "可以转，一般在大一下，整体来说挺好转。", "date": "2026-07-19", "verify": "多人回答一致", "para": true, "src": "在校学长学姐B"}, {"text": "但热门/难度大的院不容易。比如数院是最难转的院之一，去年通过比例约 60%；转数学差不多“30 进 15”。转专业可能意味着大二要补修大一的课。", "date": "2026-07-19", "verify": "单一经验回答", "para": true, "applies": "不同学院差别很大，数院、计算机等较难", "src": "在校学长学姐B"}]}, {"id": "erxuan", "q": "开学后的“二次选拔”是什么？考什么？谁能参加？", "cat": "major", "kw": ["二次选拔", "二选", "开学考", "选拔考试", "考什么", "伯苓选拔"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "开学后有二次选拔考试。8 月 30 日：上午数学、英语统考，下午是伯苓班加试。考试内容大致是高中数学、英语；加试内容取决于你报的班型。二选一般报一个班型。", "date": "2026-07-21", "verify": "多人回答一致", "para": true, "src": "在校学长学姐A"}, {"text": "已进特殊班的、强基的、艺术生一般不能参加二次选拔。不参加二选也没关系。", "date": "2026-07-21", "verify": "单一经验回答", "para": true, "applies": "强基/特殊班/艺术生", "src": "在校学长学姐B"}]}, {"id": "boling", "q": "伯苓班/特色班怎么样？有淘汰吗？保研率更高吗？", "cat": "major", "kw": ["伯苓", "伯班", "特色班", "省身班", "淘汰", "保研率", "拔尖"], "conflict": false, "outdated": false, "note": "具体优势、淘汰规则“分学院”，各院不一样。", "official": null, "answers": [{"text": "伯苓班主要优势在保研（保研名额单独划分，但实际仍由各学院管理）。有淘汰制，但几乎没人被淘汰；淘汰一般看班内后几名、分学院和人数。特色班和普通班课程差别不大，保研仍和普通班一起排名，但保研率通常还是高一点。", "date": "2026-07-22", "verify": "多人回答一致", "para": true, "src": "在校学长学姐D"}]}, {"id": "shuzhi", "q": "“数智班/数学与大数据”学什么？和数学、信计有什么区别？", "cat": "major", "kw": ["数智", "数学与大数据", "信息与计算科学", "数学", "人工智能", "数据结构"], "conflict": false, "outdated": false, "note": "就业类看法为群友个人观点。", "official": null, "answers": [{"text": "数学与大数据大类下信计和数学“本质一样”，课程基本没什么区别。数智班基础数学也学不少，数据结构等要学。学长提醒：这个大类里就业更好的还得看统院方向。", "date": "2026-07-19", "verify": "多人回答一致", "para": true, "src": "在校学长学姐B"}]}, {"id": "xuanke-where", "q": "大学在哪里选课？培养计划在哪看？", "cat": "course", "kw": ["选课", "在哪选课", "教务系统", "培养计划", "抢课"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "在教务系统选课。培养计划在“教务系统—培养计划”里看；教务系统还新上了可以查看别的专业培养计划的功能。", "date": "2026-07-19", "verify": "多人回答一致", "para": true, "src": "在校学长学姐E"}]}, {"id": "yingyu-fenban", "q": "英语有分班考试吗？要上几年？", "cat": "course", "kw": ["英语分班", "分班考", "英语几年", "英语"], "conflict": true, "outdated": false, "note": "两位学长说法不一致（按高考分分 vs 自己选），建议开学以教务/外院的正式通知为准。", "official": null, "answers": [{"text": "一位学长说：没有分班考试，按高考分分班。", "date": "2026-07-21", "verify": "单一经验回答", "para": true, "applies": "一种说法", "src": "在校学长学姐B"}, {"text": "另一位学长说：想上哪个班自己选。", "date": "2026-07-21", "verify": "单一经验回答", "para": true, "applies": "另一种说法", "src": "在校学长学姐A"}]}, {"id": "xuefei", "q": "南开学费怎么收？学分怎么收费？", "cat": "fee", "kw": ["学费", "学分制", "学分收费", "缴费", "收费标准"], "conflict": false, "outdated": false, "note": "官方招生章程确认南开“实施学分制收费”，具体标准见官网《南开大学本科生学分制收费管理暂行办法》；每学分 120 元的具体数字未在官方章程中找到，请以官方文件为准。", "official": {"title": "学分制收费", "src": "南开大学2026年本科招生章程（第二十三条）", "url": "https://zsb.nankai.edu.cn/2026-05-27/1813.html", "date": "2026-07-22", "text": "官方章程写明：学校实施学分制收费，具体详情见官网下载专区《南开大学本科生学分制收费管理暂行办法》。这印证了群聊“专业学费+学分学费”的说法；但“每学分 120 元”的具体数字未在官方章程中出现。"}, "answers": [{"text": "群里学长说：南开是“专业学费 + 学分学费”，每修 1 学分交 120 元。", "date": "2026-07-22", "verify": "单一经验回答", "para": true, "applies": "120元/学分为群友经验数字", "src": "在校学长学姐B"}]}, {"id": "zhusufei", "q": "住宿费大概多少？", "cat": "fee", "kw": ["住宿费", "宿舍费", "多少钱"], "conflict": false, "outdated": false, "note": null, "official": {"title": "住宿费标准", "src": "南开大学2026年本科招生章程（第二十三条）", "url": "https://zsb.nankai.edu.cn/2026-05-27/1813.html", "date": "2026-07-22", "text": "官方章程写明：住宿费根据住宿条件不同，一般为 800–1200 元/年。"}, "answers": [{"text": "（官方口径）住宿费按住宿条件不同，一般为 800–1200 元/年。", "date": "2026-07-22", "verify": "官方已核验", "para": true, "applies": "来源：南开2026本科招生章程第二十三条", "src": "官方来源"}]}, {"id": "junxun-days", "q": "军训多少天？早开学吗？", "cat": "military", "kw": ["军训", "军训几天", "军训天数", "早开学", "14天", "21天"], "conflict": false, "outdated": true, "note": "军训天数各年可能变化，以当年学校安排为准。", "official": null, "answers": [{"text": "今年新生军训约 14 天，且比老生早开学一周左右。", "date": "2026-07-21", "verify": "多人回答一致", "para": true, "src": "在校学长学姐B"}, {"text": "有学长提到“前年是 21 天”，天数各年不同。", "date": "2026-07-21", "verify": "单一经验回答", "para": true, "applies": "往年，可能已过时", "src": "群友"}]}, {"id": "junxun-zhuang", "q": "军训穿什么？鞋子学校发吗？", "cat": "military", "kw": ["军训着装", "军训服", "军训鞋", "武装带", "腰带", "黑色运动鞋", "纯黑"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "军训服由学校统一发（比较宽）；“武装带”统一发，别在裤子上的腰带需自己准备。鞋子要自己带，必须是纯黑运动鞋，不能带白色。", "date": "2026-07-19", "verify": "多人回答一致", "para": true, "src": "群友"}]}, {"id": "mianxun", "q": "军训能申请免训吗？学分和绩点怎么算？", "cat": "military", "kw": ["免训", "免训学分", "军训绩点", "军训学分"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "免训仍能正常获得学分，但军训算绩点，免训会让这门成绩/绩点下降。申请免训一般要三甲医院开证明，证明确实不能训练。", "date": "2026-07-22", "verify": "多人回答一致", "para": true, "src": "在校学长学姐F"}]}, {"id": "sushe-ren", "q": "宿舍是几人间？上下铺还是上床下桌？", "cat": "dorm", "kw": ["几人间", "四人间", "上下铺", "上床下桌", "宿舍人数"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "八里台是南开仅剩的上下铺（也有 2–4 人间）；津南是上床下桌。", "date": "2026-07-21", "verify": "多人回答一致", "para": true, "applies": "八里台 vs 津南不同", "src": "在校学长学姐B"}]}, {"id": "sushe-weiyu", "q": "宿舍有独立卫浴吗？浴室要排队吗？", "cat": "dorm", "kw": ["独立卫浴", "卫浴", "浴室", "公共", "排队", "洗澡"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "卫浴是公共的，不是独立卫浴。浴室公共，军训期间人多可能要排队。", "date": "2026-07-21", "verify": "多人回答一致", "para": true, "src": "在校学长学姐A"}]}, {"id": "sushe-nuanqi", "q": "宿舍有暖气/空调吗？会限电吗？", "cat": "dorm", "kw": ["暖气", "空调", "限电", "制冷"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "有暖气、有空调。八里台限电比较严重（有人特别提到十六/十七/十八/十九宿），津南同学表示没什么感觉。空调制冷效果有人觉得一般、有人觉得挺好。", "date": "2026-07-20", "verify": "多人回答一致", "para": true, "applies": "八里台限电明显，津南较少", "src": "在校学长学姐B"}]}, {"id": "sushe-liangyi", "q": "在哪里晾衣服？有阳台吗？", "cat": "dorm", "kw": ["晾衣", "晾衣服", "阳台", "公共晾衣间"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "一般在公共晾衣间或公共阳台晾。八里台宿舍没有独立阳台，学长认为这是个缺点；化院的 20 宿、21 宿条件较新、没有这个困扰。", "date": "2026-07-21", "verify": "多人回答一致", "para": true, "applies": "八里台没阳台；20/21宿较新", "src": "在校学长学姐A"}]}, {"id": "sushe-yigui", "q": "宿舍有衣柜吗？床尺寸多大？", "cat": "dorm", "kw": ["衣柜", "床尺寸", "床大小", "床铺", "1.2米"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "有衣柜，但比较小。床大概是 191×84 或 210×84（cm）；八里台从房顶到床板约 1.2 米。", "date": "2026-07-21", "verify": "单一经验回答", "para": true, "applies": "尺寸为群友经验值，买前最好确认自己宿舍", "src": "在校学长学姐A"}]}, {"id": "chuangdian", "q": "床垫/床帘/蚊帐要自己买吗？", "cat": "dorm", "kw": ["床垫", "床帘", "蚊帐", "被子", "统一售卖"], "conflict": false, "outdated": false, "note": "买大件前最好先确认自己被分到哪个宿舍。", "official": null, "answers": [{"text": "床垫建议自己买——统一买的床垫偏硬。", "date": "2026-07-22", "verify": "多人回答一致", "para": true, "src": "群友"}, {"text": "床帘可以买遮光布帘，商家一般会再送大的挂环，直接挂在床铺轨道上。蚊帐看个人：楼层高蚊虫基本不多，可备可不备（且大一结束换寝，一体蚊帐会麻烦）。", "date": "2026-07-20", "verify": "单一经验回答", "para": true, "src": "在校学长学姐G"}]}, {"id": "chuangwei", "q": "床位怎么分？能自己选室友吗？", "cat": "dorm", "kw": ["床位分配", "选床位", "室友", "自己选", "怎么知道室友"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "床位一般报到当天先跟室友商量，没商量好就先到先得；没有专门的网上选床/查室友系统。室友通常由辅导员分，同院系混住为主。大一结束换新宿舍时可以自己组室友。", "date": "2026-07-21", "verify": "多人回答一致", "para": true, "src": "在校学长学姐B"}]}, {"id": "huansushe", "q": "为什么大一之后要换宿舍？", "cat": "dorm", "kw": ["换宿舍", "大一后换", "分流搬宿舍", "搬宿舍"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "大类分流后一般按分流后的学院调整宿舍，所以大一结束会换。津南有同学说不用按学院搬——各院情况不同。", "date": "2026-07-20", "verify": "单一经验回答", "para": true, "src": "在校学长学姐G"}]}, {"id": "xiaoyuanka", "q": "校园卡有用吗？要提前办吗？", "cat": "card", "kw": ["校园卡", "要不要办", "有用吗"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "不用自己提前办，没必要。", "date": "2026-07-19", "verify": "多人回答一致", "para": true, "src": "在校学长学姐E"}]}, {"id": "wifi", "q": "校园网/WiFi 收费吗？", "cat": "card", "kw": ["wifi", "校园网", "网费", "免费网络"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "南开校园网免费。", "date": "2026-07-20", "verify": "单一经验回答", "para": true, "src": "在校学长学姐B"}]}, {"id": "feishu", "q": "辅导员怎么联系？飞书是什么？", "cat": "card", "kw": ["飞书", "辅导员", "联系辅导员", "报修"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "辅导员平时通过飞书联系（有同学吐槽飞书上有时已读不回）；宿舍报修等也走飞书。", "date": "2026-07-19", "verify": "单一经验回答", "para": true, "src": "在校学长学姐E"}]}, {"id": "shitang", "q": "南开食堂怎么样？怎么支付？", "cat": "life", "kw": ["食堂", "好吃吗", "支付", "刷卡", "吃饭"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "食堂口碑一般，别抱太大期望（个人口味不同）。支付方式：刷卡或手机都可以。", "date": "2026-07-19", "verify": "多人回答一致", "para": true, "src": "在校学长学姐E"}]}, {"id": "yumaoqiu", "q": "羽毛球场/球馆收费吗？", "cat": "life", "kw": ["羽毛球", "球馆", "包场", "收费", "场地费"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "场地对学生一般不收费，球馆挺大。包场按时段不同，有 0、5、10 元的情况，维修期间甚至免费。", "date": "2026-07-22", "verify": "多人回答一致", "para": true, "src": "在校学长学姐D"}]}, {"id": "zaowanzixi", "q": "有早晚自习/晨跑/校园跑吗？", "cat": "life", "kw": ["早自习", "晚自习", "晨跑", "校园跑", "早晚自习"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "没有早晚自习。有校园跑/体测类安排（有同学提到 10km 体测、校园跑“套餐”）。", "date": "2026-07-21", "verify": "多人回答一致", "para": true, "applies": "以学院具体安排为准", "src": "同级新生群友"}]}, {"id": "shetuan", "q": "社团怎么加？一个人能进几个？有百团大战吗？", "cat": "club", "kw": ["社团", "百团大战", "吉他社", "乒乓球", "社团上限"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "开学有“百团大战”纳新。一个人进多个社团一般没有上限。群里提到有吉他社（目前以电吉他为主）、乒乓球社等。", "date": "2026-07-20", "verify": "单一经验回答", "para": true, "src": "在校学长学姐G"}]}, {"id": "pingban", "q": "大一要买平板吗？笔记本电脑必须吗？", "cat": "other", "kw": ["平板", "笔记本", "电脑", "交作业", "买平板"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "笔记本电脑是必需品，平板是可选品。交作业不强制用平板——可以写在纸上拍照上传，或交电子稿。平板主要用来做笔记，看个人习惯。", "date": "2026-07-22", "verify": "多人回答一致", "para": true, "src": "在校学长学姐E"}]}, {"id": "jiazhao", "q": "考驾照能加学分吗？", "cat": "other", "kw": ["驾照", "考驾照", "加学分", "综测"], "conflict": false, "outdated": false, "note": "说法为群友经验，具体以学校学分认定规定为准。", "official": null, "answers": [{"text": "学长的说法是：驾照不能直接“加学分/加综测分”。（另有关于学分制收费“1 学分 120 元”的讨论，属另一个问题。）", "date": "2026-07-21", "verify": "单一经验回答", "para": true, "src": "在校学长学姐B"}]}, {"id": "shengcun", "q": "有没有新生“生存手册”之类的资料？", "cat": "other", "kw": ["生存手册", "攻略", "手册", "飞书文档"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "群里有学长发布了《NKU 计算机科学与技术/软件工程/智能科学与技术 生存手册》，据说需要用飞书查看。", "date": "2026-07-20", "verify": "单一经验回答", "para": true, "applies": "主要面向计算机/软件/智能方向", "src": "群友"}]}, {"id": "anquan", "q": "群里自称“导员”发文档链接/有人加好友，可信吗？", "cat": "other", "kw": ["导员", "腾讯文档", "加好友", "盗号", "诈骗", "链接"], "conflict": false, "outdated": false, "note": null, "official": null, "answers": [{"text": "群里出现自称“导员”发腾讯文档网址、或莫名其妙加好友的情况，学长提醒“别点、小心”，警惕盗号和诈骗。", "date": "2026-07-20", "verify": "多人回答一致", "para": true, "src": "群友"}]}]};</script>
+  <script>
+/* 南开新生问答 — 前端逻辑（原生 JS，本地搜索，无后端）
+   数据来源：优先使用内联的 window.__FAQ_DATA__（单文件版），否则 fetch data/faq.json。 */
+(function () {
+  "use strict";
+
+  var VERIFY = {
+    "官方已核验": "b-official", "多人回答一致": "b-multi", "单一经验回答": "b-single",
+    "存在冲突": "b-conflict", "可能已经过时": "b-outdated", "无法确认": "b-na"
+  };
+  var CAT_NAME = {};
+  var state = { q: "", cat: "all", data: null };
+
+  var el = {
+    input: document.getElementById("search"),
+    clear: document.getElementById("clear"),
+    chips: document.getElementById("chips"),
+    count: document.getElementById("count"),
+    list: document.getElementById("list"),
+    updated: document.getElementById("updated"),
+    disclaimer: document.getElementById("disclaimer"),
+    toggle: document.getElementById("theme-toggle")
+  };
+
+  /* ---------- 主题切换 ---------- */
+  (function initTheme() {
+    var saved = null;
+    try { saved = window.localStorage.getItem("nk-theme"); } catch (e) {}
+    if (saved === "dark" || saved === "light") document.documentElement.setAttribute("data-theme", saved);
+    function label() {
+      var t = document.documentElement.getAttribute("data-theme");
+      var dark = t === "dark" || (!t && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      el.toggle.textContent = dark ? "☀ 浅色" : "☾ 深色";
+      el.toggle.setAttribute("aria-label", dark ? "切换到浅色模式" : "切换到深色模式");
+    }
+    label();
+    el.toggle.addEventListener("click", function () {
+      var cur = document.documentElement.getAttribute("data-theme");
+      var dark = cur === "dark" || (!cur && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      var next = dark ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      try { window.localStorage.setItem("nk-theme", next); } catch (e) {}
+      label();
+    });
+  })();
+
+  /* ---------- 工具 ---------- */
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  function highlight(text, q) {
+    var safe = esc(text);
+    if (!q) return safe;
+    var terms = q.split(/\s+/).filter(Boolean).map(function (t) {
+      return t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); });
+    if (!terms.length) return safe;
+    try { return safe.replace(new RegExp("(" + terms.join("|") + ")", "gi"), "<mark>$1</mark>"); }
+    catch (e) { return safe; }
+  }
+
+  function haystack(f) {
+    var parts = [f.q, CAT_NAME[f.cat] || "", (f.kw || []).join(" "), f.note || ""];
+    f.answers.forEach(function (a) { parts.push(a.text, a.applies || "", a.src || ""); });
+    if (f.official) parts.push(f.official.text, f.official.title);
+    return parts.join(" ").toLowerCase();
+  }
+
+  function matches(f) {
+    if (state.cat !== "all" && f.cat !== state.cat) return false;
+    if (!state.q) return true;
+    var hs = haystack(f);
+    return state.q.toLowerCase().split(/\s+/).filter(Boolean).every(function (t) { return hs.indexOf(t) !== -1; });
+  }
+
+  /* ---------- 渲染 ---------- */
+  function badge(label) {
+    return '<span class="badge ' + (VERIFY[label] || "b-na") + '">' + esc(label) + "</span>";
+  }
+
+  function answerHTML(a, q) {
+    var h = '<div class="ans"><div class="text">' + highlight(a.text, q) + "</div>";
+    if (a.applies) h += '<div class="applies">' + highlight(a.applies, q) + "</div>";
+    h += '<div class="ans-meta">' + badge(a.verify);
+    if (a.para) h += '<span class="badge b-para">整理表述</span>';
+    h += '<span class="src">' + esc(a.src || "群友") + "</span>";
+    h += '<span class="date">' + esc(a.date || "") + "</span></div></div>";
+    return h;
+  }
+
+  function faqHTML(f, q) {
+    var mini = "";
+    if (f.conflict) mini += badge("存在冲突");
+    if (f.outdated) mini += badge("可能已经过时");
+    if (f.official) mini += badge("官方已核验");
+
+    var h = '<article class="faq" id="' + esc(f.id) + '" open-state="0">';
+    h += '<button class="faq-head" aria-expanded="false" aria-controls="body-' + esc(f.id) + '">';
+    h += '<span class="cat-tag">' + esc(CAT_NAME[f.cat] || f.cat) + "</span>";
+    h += '<span class="q">' + highlight(f.q, q) + "</span>";
+    if (mini) h += '<span class="mini-badges">' + mini + "</span>";
+    h += '<span class="chev" aria-hidden="true">▾</span></button>';
+
+    h += '<div class="faq-body" id="body-' + esc(f.id) + '">';
+    if (f.conflict) h += '<div class="alert conflict"><span class="a-t">存在冲突：</span>以下回答互相矛盾，均予保留，请以最新官方通知为准。</div>';
+    if (f.outdated) h += '<div class="alert outdated"><span class="a-t">可能已过时：</span>该信息各年可能变化，请以当年学校安排为准。</div>';
+
+    h += '<div class="answers">';
+    f.answers.forEach(function (a) { h += answerHTML(a, q); });
+    h += "</div>";
+
+    if (f.official) {
+      var o = f.official;
+      h += '<div class="official"><div class="o-t">✓ 官方核验 · ' + esc(o.title) + "</div>";
+      h += '<div class="o-b">' + highlight(o.text, q) + "</div>";
+      h += '<div class="o-src">来源：' + esc(o.src) + '（访问日期 ' + esc(o.date) + '）';
+      if (o.url) h += '<br><a href="' + esc(o.url) + '" target="_blank" rel="noopener">' + esc(o.url) + "</a>";
+      h += "</div></div>";
+    }
+    if (f.note) h += '<div class="note">' + highlight(f.note, q) + "</div>";
+    h += '<button class="copy-link" data-id="' + esc(f.id) + '">🔗 复制本问题链接</button>';
+    h += "</div></article>";
+    return h;
+  }
+
+  function render() {
+    var q = state.q;
+    var shown = state.data.faqs.filter(matches);
+    // 计数
+    el.count.innerHTML = "共 <b>" + state.data.faqs.length + "</b> 条问答" +
+      (state.q || state.cat !== "all" ? "，当前筛选出 <b>" + shown.length + "</b> 条" : "");
+    // 分类计数
+    Array.prototype.forEach.call(el.chips.children, function (chip) {
+      var c = chip.getAttribute("data-cat");
+      var n = c === "all" ? state.data.faqs.length : state.data.faqs.filter(function (f) { return f.cat === c; }).length;
+      var cnt = chip.querySelector(".c"); if (cnt) cnt.textContent = n;
+      chip.setAttribute("aria-pressed", state.cat === c ? "true" : "false");
+    });
+
+    if (!shown.length) {
+      el.list.innerHTML = '<div class="empty"><div class="big">没有找到相关问答</div>' +
+        "<div>换个关键词试试，或清除筛选查看全部。</div>" +
+        '<button id="reset">清除搜索与筛选</button></div>';
+      document.getElementById("reset").addEventListener("click", resetAll);
+      return;
+    }
+    el.list.innerHTML = shown.map(function (f) { return faqHTML(f, q); }).join("");
+    bindCards();
+    // 若 URL 带锚点，自动展开定位
+    if (location.hash) openFromHash();
+  }
+
+  function bindCards() {
+    Array.prototype.forEach.call(el.list.querySelectorAll(".faq-head"), function (btn) {
+      btn.addEventListener("click", function () { toggleCard(btn.closest(".faq")); });
+    });
+    Array.prototype.forEach.call(el.list.querySelectorAll(".copy-link"), function (b) {
+      b.addEventListener("click", function () {
+        var url = location.origin + location.pathname + "#" + b.getAttribute("data-id");
+        var done = function () { b.textContent = "✓ 链接已复制"; setTimeout(function () { b.textContent = "🔗 复制本问题链接"; }, 1600); };
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, function () { prompt("复制此链接：", url); });
+        else prompt("复制此链接：", url);
+        history.replaceState(null, "", "#" + b.getAttribute("data-id"));
+      });
+    });
+  }
+
+  function toggleCard(card, forceOpen) {
+    var open = card.getAttribute("open-state") === "1";
+    var next = forceOpen ? true : !open;
+    card.setAttribute("open-state", next ? "1" : "0");
+    card.querySelector(".faq-head").setAttribute("aria-expanded", next ? "true" : "false");
+  }
+
+  function openFromHash() {
+    var id = decodeURIComponent(location.hash.slice(1));
+    var card = document.getElementById(id);
+    if (card && card.classList.contains("faq")) {
+      toggleCard(card, true);
+      document.querySelectorAll(".faq.target").forEach(function (c) { c.classList.remove("target"); });
+      card.classList.add("target");
+      card.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
+  function resetAll() {
+    state.q = ""; state.cat = "all"; el.input.value = ""; el.clear.classList.remove("show");
+    render();
+  }
+
+  /* ---------- 事件 ---------- */
+  el.input.addEventListener("input", function () {
+    state.q = el.input.value.trim();
+    el.clear.classList.toggle("show", !!el.input.value);
+    render();
+  });
+  el.clear.addEventListener("click", function () {
+    el.input.value = ""; state.q = ""; el.clear.classList.remove("show"); el.input.focus(); render();
+  });
+  window.addEventListener("hashchange", openFromHash);
+
+  /* ---------- 启动 ---------- */
+  function boot(data) {
+    state.data = data;
+    (data.categories || []).forEach(function (c) { CAT_NAME[c.key] = c.name; });
+    document.getElementById("subtitle").textContent = data.meta.disclaimer ? "" : "";
+    el.disclaimer.innerHTML = "<strong>免责声明：</strong>" + esc(data.meta.disclaimer);
+    el.updated.innerHTML = "整理来源：" + esc(data.meta.source) +
+      "（约 " + esc(data.meta.msg_total) + " 条消息，时间范围 " + esc(data.meta.range) + "）<br>" +
+      "最后更新：<b>" + esc(data.meta.generated) + "</b>";
+    // 分类 chips
+    var chips = ['<button class="chip" data-cat="all" aria-pressed="true">全部<span class="c"></span></button>'];
+    (data.categories || []).forEach(function (c) {
+      chips.push('<button class="chip" data-cat="' + esc(c.key) + '" aria-pressed="false">' + esc(c.name) + '<span class="c"></span></button>');
+    });
+    el.chips.innerHTML = chips.join("");
+    Array.prototype.forEach.call(el.chips.children, function (chip) {
+      chip.addEventListener("click", function () { state.cat = chip.getAttribute("data-cat"); render(); });
+    });
+    render();
+  }
+
+  if (window.__FAQ_DATA__) { boot(window.__FAQ_DATA__); }
+  else {
+    fetch("data/faq.json").then(function (r) {
+      if (!r.ok) throw new Error("加载失败 " + r.status); return r.json();
+    }).then(boot).catch(function (err) {
+      el.list.innerHTML = '<div class="empty"><div class="big">数据加载失败</div><div>' +
+        esc(err.message) + '<br>若在本地打开单文件版，请使用 dist/index.html。</div></div>';
+    });
+  }
+})();
+
+</script>
+</body>
+</html>

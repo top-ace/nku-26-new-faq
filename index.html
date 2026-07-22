@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>南开新生问答 · 新生群常见问题整理</title>
+  <meta name="description" content="根据 2026 南开大学新生群交流整理的常见问题解答，可搜索、可筛选、手机友好。群聊回答不代表学校官方结论，请以学校最新官方通知为准。">
+  <meta name="color-scheme" content="light dark">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="masthead">
+    <div class="wrap masthead-inner">
+      <button id="theme-toggle" class="theme-toggle" type="button">☾ 深色</button>
+      <p class="eyebrow">允公允能 · 日新月异<span class="est">SINCE 1919</span></p>
+      <h1 class="title">南开新生问答<span class="accent">.</span></h1>
+      <p class="subtitle" id="subtitle">把新生群里被反复问到的问题整理成一页，方便查找。每条回答都标注了匿名来源、日期与可信度，冲突和可能过时的信息都会明确提示。</p>
+      <div class="lotus-rule"></div>
+      <div class="disclaimer" id="disclaimer"></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="searchbar">
+      <div class="search-field">
+        <span class="search-ico" aria-hidden="true">🔍</span>
+        <input id="search" type="search" inputmode="search" autocomplete="off"
+               placeholder="搜索问题、答案、关键词或分类，例如：军训、校区、宿舍…"
+               aria-label="搜索问答">
+        <button id="clear" class="clear-btn" type="button" aria-label="清除搜索">×</button>
+      </div>
+      <nav class="chips" id="chips" aria-label="分类筛选"></nav>
+    </div>
+
+    <p class="count" id="count" aria-live="polite"></p>
+    <section class="list" id="list" aria-live="polite"></section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap">
+      <p class="updated" id="updated"></p>
+      <p>本页面为新生自发整理，非南开大学官方发布。内容仅供参考，具体安排请以
+        <a href="https://zsb.nankai.edu.cn/" target="_blank" rel="noopener">南开大学本科招生网</a>
+        等官方渠道的最新通知为准。</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

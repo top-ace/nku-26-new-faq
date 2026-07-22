@@ -1,0 +1,25 @@
+# ===== 隐私优先：以下内容严禁提交到公开仓库 =====
+
+# 私有来源审核文件（含真实昵称、QQ号、原始消息）
+private/
+private/source-audit.csv
+
+# 私有审核页面（内嵌真实昵称与原始消息，仅供本地核对）
+review/faq-review.html
+
+# 原始 QQ 聊天记录导出（QCE JSON，含大量可识别信息）
+*.json
+!data/faq.json          # 唯一允许提交的 JSON：已脱敏的公开 FAQ 数据
+
+# 其它可能含隐私的导出
+*_QCE*.json
+group_*.json
+*.csv
+!*/faq.json
+
+# 系统/编辑器
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+node_modules/
