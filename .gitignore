@@ -5,6 +5,7 @@ private/
 private/source-audit.csv
 
 # 私有审核页面（内嵌真实昵称与原始消息，仅供本地核对）
+review/
 review/faq-review.html
 
 # 原始 QQ 聊天记录导出（QCE JSON，含大量可识别信息）

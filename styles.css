@@ -82,6 +82,7 @@ body {
 }
 .title .accent { color: var(--nk-purple); }
 .subtitle { color: var(--ink-2); font-size: 14.5px; margin: 0 0 14px; max-width: 60ch; }
+.motto { color: var(--nk-purple); font-size: 15px; font-weight: 600; font-style: italic; margin: 0 0 14px; letter-spacing: .02em; }
 .lotus-rule { height: 3px; width: 54px; background: linear-gradient(90deg, var(--nk-purple), transparent); border-radius: 3px; }
 
 .theme-toggle {
