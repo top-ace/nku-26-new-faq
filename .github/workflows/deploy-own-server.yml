@@ -1,0 +1,198 @@
+name: Deploy FAQ to Aliyun ECS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nku-new-faq-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy production mirror
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Validate public FAQ files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -f index.html
+          test -f styles.css
+          test -f app.js
+          test -f data/faq.json
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(Path("data/faq.json").read_text(encoding="utf-8"))
+          faqs = data.get("faqs")
+
+          if not isinstance(faqs, list) or not faqs:
+              raise SystemExit("data/faq.json 中的 faqs 必须是非空数组")
+
+          ids = [item.get("id") for item in faqs]
+          missing = [i for i, value in enumerate(ids) if not value]
+          duplicates = sorted({value for value in ids if value and ids.count(value) > 1})
+
+          if missing:
+              raise SystemExit(f"存在缺少 id 的 FAQ，数组位置：{missing}")
+          if duplicates:
+              raise SystemExit(f"存在重复 FAQ id：{duplicates}")
+
+          blocked = [
+              Path("private"),
+              Path("review"),
+              Path("source-audit.csv"),
+              Path("faq-review.html"),
+          ]
+          found = [str(path) for path in blocked if path.exists()]
+          if found:
+              raise SystemExit("发现禁止部署的私有文件或目录：" + ", ".join(found))
+
+          print(f"Validated {len(faqs)} FAQ entries.")
+          PY
+
+      - name: Prepare public deployment package
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          rm -rf .deploy
+          mkdir -p .deploy/data
+
+          install -m 0644 index.html .deploy/index.html
+          install -m 0644 styles.css .deploy/styles.css
+          install -m 0644 app.js .deploy/app.js
+          install -m 0644 data/faq.json .deploy/data/faq.json
+
+          python - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          info = {
+              "commit": os.environ["GITHUB_SHA"],
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "run_id": os.environ["GITHUB_RUN_ID"],
+              "deployed_at": datetime.now(timezone.utc).isoformat(),
+          }
+
+          Path(".deploy/deploy-info.json").write_text(
+              json.dumps(info, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Configure SSH
+        shell: bash
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+
+          test -n "${DEPLOY_SSH_KEY:-}"
+          test -n "${DEPLOY_KNOWN_HOSTS:-}"
+
+          install -d -m 0700 "$HOME/.ssh"
+
+          printf '%s\n' "$DEPLOY_SSH_KEY" |
+            tr -d '\r' > "$HOME/.ssh/id_ed25519"
+
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" |
+            tr -d '\r' > "$HOME/.ssh/known_hosts"
+
+          chmod 0600 "$HOME/.ssh/id_ed25519"
+          chmod 0600 "$HOME/.ssh/known_hosts"
+
+          ssh-keygen -y -f "$HOME/.ssh/id_ed25519" >/dev/null
+
+      - name: Deploy atomically
+        shell: bash
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_BASE: /var/www/nku-new-faq
+        run: |
+          set -euo pipefail
+
+          test -n "${DEPLOY_HOST:-}"
+          test -n "${DEPLOY_PORT:-}"
+          test -n "${DEPLOY_USER:-}"
+
+          RELEASE="$DEPLOY_BASE/releases/$GITHUB_SHA"
+          REMOTE="$DEPLOY_USER@$DEPLOY_HOST"
+
+          SSH_OPTIONS=(
+            -i "$HOME/.ssh/id_ed25519"
+            -p "$DEPLOY_PORT"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts"
+            -o ConnectTimeout=15
+          )
+
+          RSYNC_SSH="ssh -i $HOME/.ssh/id_ed25519 -p $DEPLOY_PORT -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts -o ConnectTimeout=15"
+
+          ssh "${SSH_OPTIONS[@]}" "$REMOTE"             "mkdir -p '$RELEASE'"
+
+          rsync             -az             --delete             -e "$RSYNC_SSH"             .deploy/             "$REMOTE:$RELEASE/"
+
+          ssh "${SSH_OPTIONS[@]}" "$REMOTE" "
+            set -e
+
+            test -f '$RELEASE/index.html'
+            test -f '$RELEASE/styles.css'
+            test -f '$RELEASE/app.js'
+            test -f '$RELEASE/data/faq.json'
+            test -f '$RELEASE/deploy-info.json'
+
+            ln -sfn '$RELEASE' '$DEPLOY_BASE/current.next'
+            mv -Tf '$DEPLOY_BASE/current.next' '$DEPLOY_BASE/current'
+
+            find '$DEPLOY_BASE/releases'               -mindepth 1               -maxdepth 1               -type d               -printf '%T@ %p\n' |
+              sort -nr |
+              tail -n +6 |
+              cut -d' ' -f2- |
+              xargs -r rm -rf
+          "
+
+      - name: Verify public deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          curl             --fail             --silent             --show-error             --location             --retry 6             --retry-delay 2             --retry-all-errors             "https://nku-new-faq.logsinx.com/deploy-info.json?sha=$GITHUB_SHA"             > /tmp/deploy-info.json
+
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          info = json.loads(Path("/tmp/deploy-info.json").read_text(encoding="utf-8"))
+          expected = os.environ["GITHUB_SHA"]
+          actual = info.get("commit")
+
+          if actual != expected:
+              raise SystemExit(f"公网版本不一致：expected={expected}, actual={actual}")
+
+          print(f"Public deployment verified: {actual}")
+          PY
