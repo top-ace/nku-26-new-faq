@@ -11,12 +11,14 @@
 - 数据来源：
   - 一份用 [QCE（QQ Chat Exporter）](https://github.com/shuakami/qq-chat-exporter) 导出的 QQ 群聊 JSON（约 4538 条消息，时间范围 2026-07-19 至 2026-07-22）；
   - **2026-07-24 增量更新**：新一份 QCE 导出的 QQ 群聊 JSON（5990 条，2026-07-22 至 2026-07-24）＋ 一份微信群导出 JSON（815 条，2026-07-20 至 2026-07-23）。回答来源在页面上以"（QQ群）/（微信群）"区分标注。
+  - **2026-07-29 增量更新**：再一份 QCE 导出的 QQ 群聊 JSON（导出 17691 条，2026-07-23 至 2026-07-29；剔除与上轮重叠区后新增 14256 条，清洗去重后可用 13731 条）。
 - 从中提取新生高频、实用的问题，合并语义相同的问法，汇总同一问题下的多条有效回答。
 - 每条回答都标注了 **匿名来源、回答日期、可信度徽章**；互相冲突、可能过时、以及经过官方核验的信息都会明确标出。
 
 ## 功能
 
 - 即时本地搜索（问题 / 答案 / 关键词 / 分类），高亮命中词
+- 两种排序：**按提问热度**（默认，来自 `freq` 字段）/ 按分类顺序
 - 分类筛选、结果计数、清除按钮、空结果友好提示
 - FAQ 折叠卡片，同一问题下多条回答并列
 - 可信度徽章、冲突警告、可能过时提示、官方核验区块
@@ -34,10 +36,15 @@ new-student-faq/
 │  └─ faq.json         # 已脱敏的公开 FAQ 数据（唯一允许提交的 JSON）
 ├─ dist/
 │  └─ index.html       # 单文件离线版：CSS/JS/数据全部内嵌，断网可直接打开
-├─ review/
-│  └─ faq-review.html  # 私有审核页（含真实昵称，已 gitignore，勿公开）
-├─ private/
-│  └─ source-audit.csv # 私有来源审核表（含真实昵称/原文，已 gitignore，勿公开）
+├─ review/                             # ← 整个目录已 gitignore，勿公开
+│  ├─ faq-review.html                  #   私有审核页（首版）
+│  └─ faq-review-2026-07-29.html       #   私有审核页（2026-07-29 轮）
+├─ private/                            # ← 整个目录已 gitignore，勿公开
+│  ├─ source-audit.csv                 #   私有来源审核表（首版）
+│  └─ source-audit-2026-07-29.csv      #   私有来源审核表（2026-07-29 轮）
+├─ UPDATE-2026-07-24.md / CHANGES-2026-07-24.txt / FILELIST-2026-07-24.md
+├─ UPDATE-2026-07-29.md / CHANGES-2026-07-29.txt / FILELIST-2026-07-29.md
+├─ QUALITY-REPORT.md
 ├─ .gitignore
 ├─ README.md
 ├─ PRIVACY.md
@@ -66,6 +73,7 @@ python3 -m http.server 8000
 | `id` | 唯一 ID，同时是 URL 锚点（改动会使旧链接失效） |
 | `q` | 标准化问题（作为标题） |
 | `cat` | 分类 key（见文件顶部 `categories`） |
+| `freq` | 提问热度估算（整数），页面默认排序依据；按关键词自动统计，**不是精确计数** |
 | `kw` | 搜索别名 / 关键词数组 |
 | `answers[]` | 回答数组，每条含 `text` / `src`(匿名来源) / `date` / `verify`(可信度) / `para`(是否整理表述) / `applies`(适用范围，可选) |
 | `conflict` | 是否存在冲突回答（true 时显示冲突警告） |
@@ -74,6 +82,8 @@ python3 -m http.server 8000
 | `official` | 官方核验区块（可选，含 `title`/`text`/`src`/`url`/`date`） |
 
 `verify` 可信度取值：`官方已核验` / `多人回答一致` / `单一经验回答` / `存在冲突` / `可能已经过时` / `无法确认`。
+
+新增 FAQ 时 `freq` 可先填 `0`（会排在热度榜末尾，用"按分类顺序"仍可正常浏览）。
 
 改完 `data/faq.json` 后，若要同步更新单文件版，重新生成 `dist/index.html`（把 `styles.css`、`data/faq.json`、`app.js` 分别内联进 `index.html` 即可；数据以 `window.__FAQ_DATA__` 注入）。
 
@@ -84,7 +94,9 @@ python3 -m http.server 8000
 3. 等一两分钟，访问 `https://<你的用户名>.github.io/<仓库名>/` 即可。
 4. 页面内所有资源都用相对路径（`styles.css` / `app.js` / `data/faq.json`），在 Pages 的子路径下也能正常加载。
 
-> 提交前请再确认：`private/` 目录、`review/faq-review.html`、原始 QQ 导出 JSON **都没有被提交**（详见 [PRIVACY.md](PRIVACY.md)）。
+> 提交前请再确认：`private/` 与 `review/` 两个目录、以及原始 QQ/微信导出 JSON **都没有被提交**（详见 [PRIVACY.md](PRIVACY.md)）。
+> 可以用 `git check-ignore -v private/ review/ *.json` 逐条复核；`.gitignore` 中的取反规则必须独占一行，
+> 因为 `.gitignore` 不支持行尾注释（这一点在 2026-07-29 轮修掉过一次真实 bug）。
 
 ## 隐私与内容说明
 
@@ -93,6 +105,7 @@ python3 -m http.server 8000
 
 ## 更新记录
 
+- **2026-07-29**：增量合并新一批 QQ 群消息（新增区 14256 条），新增 14 个 FAQ、60 条回答，现共 **65 个 FAQ、152 条回答**；新增 `freq` 提问热度字段与"按提问热度 / 按分类顺序"排序切换。详见 [UPDATE-2026-07-29.md](UPDATE-2026-07-29.md)。
 - **2026-07-24**：增量合并微信群＋新一批 QQ 群消息（约 6805 条），新增 9 个 FAQ、43 条回答，现共 51 个 FAQ、92 条回答；首页新增寄语。详见 [UPDATE-2026-07-24.md](UPDATE-2026-07-24.md)。
 - **2026-07-22**：首次发布（42 个 FAQ、49 条回答）。
 

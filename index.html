@@ -33,7 +33,13 @@
       <nav class="chips" id="chips" aria-label="分类筛选"></nav>
     </div>
 
-    <p class="count" id="count" aria-live="polite"></p>
+    <div class="listhead">
+      <p class="count" id="count" aria-live="polite"></p>
+      <div class="sort" id="sort" role="group" aria-label="排序方式">
+        <button class="sort-btn" type="button" data-sort="hot" aria-pressed="true">🔥 按提问热度</button>
+        <button class="sort-btn" type="button" data-sort="cat" aria-pressed="false">☰ 按分类顺序</button>
+      </div>
+    </div>
     <section class="list" id="list" aria-live="polite"></section>
   </main>
 

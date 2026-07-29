@@ -8,7 +8,7 @@
     "存在冲突": "b-conflict", "可能已经过时": "b-outdated", "无法确认": "b-na"
   };
   var CAT_NAME = {};
-  var state = { q: "", cat: "all", data: null };
+  var state = { q: "", cat: "all", sort: "hot", data: null };
 
   var el = {
     input: document.getElementById("search"),
@@ -18,7 +18,8 @@
     list: document.getElementById("list"),
     updated: document.getElementById("updated"),
     disclaimer: document.getElementById("disclaimer"),
-    toggle: document.getElementById("theme-toggle")
+    toggle: document.getElementById("theme-toggle"),
+    sort: document.getElementById("sort")
   };
 
   /* ---------- 主题切换 ---------- */
@@ -71,6 +72,24 @@
     return state.q.toLowerCase().split(/\s+/).filter(Boolean).every(function (t) { return hs.indexOf(t) !== -1; });
   }
 
+  /* ---------- 排序 ---------- */
+  // "hot"：按提问热度 freq 降序；热度相同者保持数据文件中的原始顺序（稳定排序）
+  // "cat"：完全保持数据文件中的原始顺序（即分类归组顺序）
+  function sortList(arr) {
+    var idx = {};
+    state.data.faqs.forEach(function (f, i) { idx[f.id] = i; });
+    var out = arr.slice();
+    if (state.sort !== "hot") {
+      out.sort(function (a, b) { return idx[a.id] - idx[b.id]; });
+      return out;
+    }
+    out.sort(function (a, b) {
+      var d = (b.freq || 0) - (a.freq || 0);
+      return d !== 0 ? d : idx[a.id] - idx[b.id];
+    });
+    return out;
+  }
+
   /* ---------- 渲染 ---------- */
   function badge(label) {
     return '<span class="badge ' + (VERIFY[label] || "b-na") + '">' + esc(label) + "</span>";
@@ -95,6 +114,7 @@
     var h = '<article class="faq" id="' + esc(f.id) + '" open-state="0">';
     h += '<button class="faq-head" aria-expanded="false" aria-controls="body-' + esc(f.id) + '">';
     h += '<span class="cat-tag">' + esc(CAT_NAME[f.cat] || f.cat) + "</span>";
+    if (f.freq) h += '<span class="hot" title="按关键词自动统计的提问热度估算，非精确计数">🔥 被问约 ' + esc(f.freq) + ' 次</span>';
     h += '<span class="q">' + highlight(f.q, q) + "</span>";
     if (mini) h += '<span class="mini-badges">' + mini + "</span>";
     h += '<span class="chev" aria-hidden="true">▾</span></button>';
@@ -123,7 +143,7 @@
 
   function render() {
     var q = state.q;
-    var shown = state.data.faqs.filter(matches);
+    var shown = sortList(state.data.faqs.filter(matches));
     // 计数
     el.count.innerHTML = "共 <b>" + state.data.faqs.length + "</b> 条问答" +
       (state.q || state.cat !== "all" ? "，当前筛选出 <b>" + shown.length + "</b> 条" : "");
@@ -212,6 +232,16 @@
       chips.push('<button class="chip" data-cat="' + esc(c.key) + '" aria-pressed="false">' + esc(c.name) + '<span class="c"></span></button>');
     });
     el.chips.innerHTML = chips.join("");
+    // 排序切换
+    Array.prototype.forEach.call(el.sort.querySelectorAll(".sort-btn"), function (btn) {
+      btn.addEventListener("click", function () {
+        state.sort = btn.getAttribute("data-sort");
+        Array.prototype.forEach.call(el.sort.querySelectorAll(".sort-btn"), function (b) {
+          b.setAttribute("aria-pressed", b.getAttribute("data-sort") === state.sort ? "true" : "false");
+        });
+        render();
+      });
+    });
     Array.prototype.forEach.call(el.chips.children, function (chip) {
       chip.addEventListener("click", function () { state.cat = chip.getAttribute("data-cat"); render(); });
     });
